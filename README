@@ -1,1 +1,10 @@
 Facebook Notifier: A Facebook Notification Monitor for GNOME and Cinnamon
+
+How to install or unistall:
+
+Download the application and extract it anywhere you want
+
+cd /home/facebook-notify-master
+make install
+or
+make unistall
