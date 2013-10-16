@@ -8,3 +8,16 @@ cd /home/facebook-notify-master
 make install
 or
 make unistall
+
+Changelogs:
+
+2013-10-15  Hany alsamman
+
+    * add `icon` and `link` to notificationslist
+    * update `pyfacebook` lib and remove django config
+    * fix `pynotify` notification view
+    * add `indicate` support for ubuntu unity
+    * auto setup and ask for right access token
+    * Login as mobile/light view
+	* Fix Browser errors
+	* make some changes for best performance
