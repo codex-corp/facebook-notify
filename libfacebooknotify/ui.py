@@ -182,6 +182,10 @@ class Gui:
         about.connect("activate", self._on_about_clicked)
         quit = gtk.ImageMenuItem(stock_id=gtk.STOCK_QUIT)
         quit.connect("activate", self.exit)
+        npage = gtk.ImageMenuItem(gtk.STOCK_PROPERTIES)
+        npage.connect("activate", self._on_notify_clicked)
+
+        self._rmenu.add(npage)
         self._rmenu.add(about)
         self._rmenu.add(quit)
         self._rmenu.show_all()
@@ -674,6 +678,11 @@ class Gui:
 
             self._notifications_first_query = False
             self._notifications = result
+
+    def _on_notify_clicked(self, widget):
+        #should probbably only do this once.
+        self._sb.open_url("http://x.facebook.com/settings?tab=notifications&&ref=chrmxt"
+        )
 
     def _on_about_clicked(self, widget):
         #should probbably only do this once.
