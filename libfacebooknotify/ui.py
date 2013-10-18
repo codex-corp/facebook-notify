@@ -15,6 +15,8 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-*- coding: utf-8 -*-
 
+import subprocess
+
 import time
 import os.path
 import sys
@@ -33,7 +35,6 @@ class SimpleBrowser(gtk.Window):
         gtk.Window.__init__(self)
         self.isLoginRequest = False
         self._sw = gtk.ScrolledWindow()
-
         self._bv = BrowserEmbed()
 
         self._sw.add_with_viewport(self._bv.get_widget())
@@ -83,7 +84,7 @@ class HistoryMenuItem(gtk.ImageMenuItem):
         hb.pack_start(mtime, False, False)
         
         self.add(hb)
-        
+
 class Gui:
 
     SECONDS_1_MIN = 60
@@ -102,18 +103,18 @@ class Gui:
     OVERRIDE_NO_ACTIONS = True
 
     def __init__(self):
+	
+	self.lib_path = os.path.join(os.path.dirname(__file__)) ## get libfacebooknotify path
 
-        self.lib_path = os.path.join(os.path.dirname(__file__)) ## get libfacebooknotify path
+	self.config = ConfigParser.SafeConfigParser()
+	self.config.optionxform = str ## dont save as lowercase !!!!
+	self.config.read(self.lib_path + '/config.cfg')
 
-    	self.config = ConfigParser.SafeConfigParser()
-    	self.config.optionxform = str ## dont save as lowercase !!!!
-    	self.config.read(self.lib_path + '/config.cfg')
+	self.HISTORY_MAX = int(self.config.get('MY_CONFIG', 'HISTORY_MAX'))
+	self.SECONDS_UPDATE_FREQ = int(self.config.get('MY_CONFIG', 'SECONDS_UPDATE_FREQ'))
 
-    	self.HISTORY_MAX = int(self.config.get('MY_CONFIG', 'HISTORY_MAX'))
-    	self.SECONDS_UPDATE_FREQ = int(self.config.get('MY_CONFIG', 'SECONDS_UPDATE_FREQ'))
-
-    	self.LOGIN_HIGHT = int(self.config.get('MY_CONFIG', 'LOGIN_HIGHT'))
-    	self.LOGIN_WIDTH = int(self.config.get('MY_CONFIG', 'LOGIN_WIDTH'))
+	self.LOGIN_HIGHT = int(self.config.get('MY_CONFIG', 'LOGIN_HIGHT'))
+	self.LOGIN_WIDTH = int(self.config.get('MY_CONFIG', 'LOGIN_WIDTH'))
 
     	pynotify.init(APP_NAME)
 
@@ -146,6 +147,7 @@ class Gui:
 
     def _create_left_menu(self):
         self._lmenu = gtk.Menu()
+
         self._loginbtn = gtk.ImageMenuItem(stock_id=gtk.STOCK_DIALOG_AUTHENTICATION)
         self._loginbtn.get_children()[0].set_text("Login to Facebook")
         self._loginbtn.connect("activate", self._login_open_window)
@@ -173,6 +175,7 @@ class Gui:
         self._lmenu.show_all()
 
     def _add_lmenu_notification_summary(self, title, message, pic, url):
+
         if len(self._lmenu_summaries) == self.HISTORY_MAX:
             item = self._lmenu_summaries[0]
             self._lmenu_summaries.remove(item)
@@ -189,12 +192,13 @@ class Gui:
         about.connect("activate", self._on_about_clicked)
         quit = gtk.ImageMenuItem(stock_id=gtk.STOCK_QUIT)
         quit.connect("activate", self.exit)
-        npage = gtk.ImageMenuItem(gtk.STOCK_APPLY)
+        npage = gtk.ImageMenuItem(gtk.STOCK_PROPERTIES)
         npage.connect("activate", self._on_notify_clicked)
-	    nconfigs = gtk.ImageMenuItem(gtk.STOCK_PROPERTIES)
+
+	nconfigs = gtk.ImageMenuItem(gtk.STOCK_APPLY)
         nconfigs.connect("activate", self._on_configs_clicked)
 
-	    self._rmenu.add(nconfigs)
+	self._rmenu.add(nconfigs)
         self._rmenu.add(npage)
         self._rmenu.add(about)
         self._rmenu.add(quit)
@@ -690,11 +694,11 @@ class Gui:
             self._notifications = result
 
     def _on_configs_clicked(self, widget):
-        from libfacebooknotify.configs import ConfigsWindow
-        win = ConfigsWindow()
-        win.set_position(gtk.WIN_POS_CENTER)
-        win.set_title("Facebook notifier settings")
-        win.show_all()
+	from libfacebooknotify.configs import ConfigsWindow
+	win = ConfigsWindow()
+	win.set_position(gtk.WIN_POS_CENTER)
+	win.set_title("Facebook notifier settings")
+	win.show_all()
 
     def _on_notify_clicked(self, widget):
         #should probbably only do this once.
