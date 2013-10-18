@@ -1,4 +1,3 @@
-
 #Facebook status notifier for GNOME and Cinnamon
 #Copyright (C) 2013 was Developed by Hany alsamman <hany@codexc.com>
 #Copyright (C) 2009 John Stowers <john.stowers@gmail.com>
@@ -20,13 +19,12 @@ import time
 import threading
 import tempfile
 import urllib2
-import threading
 import traceback
 
 import libfacebooknotify.facebook as facebook
 
-class FacebookCommunicationManager(threading.Thread):
 
+class FacebookCommunicationManager(threading.Thread):
     FB_AID = 44911717818
     FB_API_KEY = "cf61e1494a431f7db3c8372cc4a17bdf"
     FB_SECRET = "144b35ddb210ca2543051d4a3d03313b"
@@ -40,12 +38,13 @@ class FacebookCommunicationManager(threading.Thread):
         self._stopped = False
         self._event = threading.Event()
         self._fb = facebook.Facebook(self.FB_API_KEY, self.FB_SECRET)
-        self._tmpdir = tempfile.mkdtemp(prefix="facebook",suffix="cache")
-	#self._fb.auth.createToken()
+        self._tmpdir = tempfile.mkdtemp(prefix="facebook", suffix="cache")
+        #self._fb.auth.createToken()
         #self._fb.login(popup=True)
-	#self._fb.auth.getSession()
+        #self._fb.auth.getSession()
 
-        print "facebook parsing using: %s (%s)" % (facebook.RESPONSE_FORMAT, getattr(facebook, "JSON_MODULE", "N/A"))
+        print
+        "facebook parsing using: %s (%s)" % (facebook.RESPONSE_FORMAT, getattr(facebook, "JSON_MODULE", "N/A"))
 
     def stop(self):
         self._stopped = True
@@ -63,13 +62,14 @@ class FacebookCommunicationManager(threading.Thread):
             #self._event.set()
 
     def get_login_url(self):
-            return self._fb.get_login_url()
+        return self._fb.get_login_url()
 
     def get_permissions_url(self):
         return self._fb.get_ext_perm_url("offline_access")
 
     def got_permissions(self):
-        print self._fb.ext_perms
+        print
+        self._fb.ext_perms
         return self._fb.ext_perms
 
     def run(self):
@@ -78,18 +78,22 @@ class FacebookCommunicationManager(threading.Thread):
                 #do any pending facebook calls
                 try:
                     cb, funcname, args, kwargs = self._pending.pop()
-                    print "Calling %s... " % funcname,
+                    print
+                    "Calling %s... " % funcname,
                     func = self._fb
                     for f in funcname.split("."):
                         func = getattr(func, f)
                     try:
                         res = func(*args)
-                        print "finished"
+                        print
+                        "finished"
                     except facebook.FacebookError, e:
-                        print "facebook error: %s" % e.msg
+                        print
+                        "facebook error: %s" % e.msg
                         res = {}
                     except urllib2.URLError, e:
-                        print "comm error: %s" % str(e.reason)
+                        print
+                        "comm error: %s" % str(e.reason)
                         res = {}
                     try:
                         cb(res)
@@ -102,18 +106,21 @@ class FacebookCommunicationManager(threading.Thread):
                 try:
                     cb, url, args, kwargs = self._pending_photos.pop()
                     try:
-                        print "Downloading %s... " % url
+                        print
+                        "Downloading %s... " % url
                         inf = urllib2.urlopen(url)
-                        fd, pic = tempfile.mkstemp(dir=self._tmpdir,suffix=".jpg")
+                        fd, pic = tempfile.mkstemp(dir=self._tmpdir, suffix=".jpg")
 
                         os.write(fd, inf.read())
                         os.close(fd)
                         inf.close()
 
-                        print "finished"
+                        print
+                        "finished"
                         self._photo_cache[url] = pic
                     except urllib2.URLError, e:
-                        print "error: %s" % str(e.reason)
+                        print
+                        "error: %s" % str(e.reason)
                         pic = ""
                     try:
                         cb(pic, *args, **kwargs)

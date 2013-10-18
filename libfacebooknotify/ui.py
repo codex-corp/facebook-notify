@@ -15,14 +15,13 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-*- coding: utf-8 -*-
 
-import subprocess
 
 import time
 import os.path
 import sys
 import gobject
 import gtk
-import indicate 
+import indicate
 import pynotify
 import ConfigParser
 
@@ -53,6 +52,7 @@ class SimpleBrowser(gtk.Window):
         else:
             self.set_position(gtk.WIN_POS_CENTER)
         self.set_size_request(825,370)
+        self.set_title("Facebook Notifier")
         self._bv.open_url(url)
         self.show_all()
 
@@ -82,7 +82,7 @@ class HistoryMenuItem(gtk.ImageMenuItem):
         mtime.props.xalign = 1.0
         mtime.props.use_markup = True
         hb.pack_start(mtime, False, False)
-        
+
         self.add(hb)
 
 class Gui:
@@ -103,7 +103,7 @@ class Gui:
     OVERRIDE_NO_ACTIONS = True
 
     def __init__(self):
-	
+
 	self.lib_path = os.path.join(os.path.dirname(__file__)) ## get libfacebooknotify path
 
 	self.config = ConfigParser.SafeConfigParser()
@@ -156,7 +156,7 @@ class Gui:
         self._homebtn = gtk.ImageMenuItem(stock_id=gtk.STOCK_HOME)
         self._homebtn.get_children()[0].set_text("Open Facebook Homepage")
         self._homebtn.connect(
-                "activate", 
+                "activate",
                 lambda x: self._sb.open_url("http://x.facebook.com/")
         )
         self._homebtn.set_sensitive(False)
@@ -222,7 +222,7 @@ class Gui:
         self.tray.connect('popup-menu', self._on_popup_menu)
         self.tray.connect('activate', self._on_activate)
         self.tray.set_visible(True)
-        
+
         #create popup menus
         self._create_left_menu()
         self._create_right_menu()
@@ -325,7 +325,7 @@ class Gui:
         if not url:
             url = self._fbcm.get_login_url()
         self._sb.open_url(
-                    url, 
+                    url,
                     statusIcon=None,
                     isLoginRequest=True
         )
@@ -380,7 +380,7 @@ class Gui:
                 self._got_notifications,
                 "notifications.get"
         )
-        
+
         # notificationslist
 	# https://developers.facebook.com/docs/reference/fql/notification/
         self._fbcm.call_facebook_function(
@@ -391,7 +391,7 @@ class Gui:
         			self._notifications_lasttime
         		)
         )
-        
+
         #schdule other checks for the future
         gobject.timeout_add_seconds(
                     self.SECONDS_UPDATE_FREQ,
@@ -422,7 +422,7 @@ class Gui:
                     self._got_notifications,
                     "notifications.get"
             )
-            
+
         if self._state == self.STATE_NOTIFICATIONSLIST:
             self._fbcm.call_facebook_function(
                     self._got_notificationslist,
@@ -451,13 +451,13 @@ class Gui:
 
     def _got_notificationslist(self, result):
     	#data returned
-    	
+
     	#may add consolidation for notifications pertaining to same thing (via href)
     	if result and result != self._notificationslist:
     		msg = ""
     		num_result = len(result)
 		icon_url = None
-    		
+
     		if num_result > 0:
 				print "   -> %d new notifications detected" % num_result
 				for i in range(num_result):
@@ -473,7 +473,7 @@ class Gui:
 						pic=icon_url,
 						timeout=pynotify.EXPIRES_DEFAULT,
 						url=result[i]["href"])
-				
+
 				if num_result == 1:
    					msg = "%d new notifications" % num_result
 
@@ -635,7 +635,7 @@ class Gui:
                         timeout=pynotify.EXPIRES_DEFAULT,
                         url=None
                 )
-    
+
     def _got_notifications(self, result):
         #data returned by facebook
         #{
