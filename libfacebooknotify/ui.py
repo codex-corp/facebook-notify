@@ -15,8 +15,6 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #-*- coding: utf-8 -*-
 
-import subprocess
-
 import time
 import os.path
 import sys
@@ -24,7 +22,7 @@ import gobject
 import gtk
 import indicate 
 import pynotify
-import webbrowser
+import ConfigParser
 
 from libfacebooknotify import APP_NAME, APP_DESCRIPTION, APP_VERSION, APP_AUTHORS, APP_HOMEPAGE, APP_LICENSE
 from libfacebooknotify.comm import FacebookCommunicationManager
@@ -91,8 +89,6 @@ class Gui:
     SECONDS_1_MIN = 60
     SECONDS_1_HOUR = 60*60
     SECONDS_1_DAY = 60*60*24
-    
-    SECONDS_UPDATE_FREQ = 60
 
     STATE_FRIENDS = 0
     STATE_ALBUMS = 1
@@ -100,14 +96,25 @@ class Gui:
     STATE_NOTIFICATIONSLIST = 3
     STATE_MAX = 4
 
-    HISTORY_MAX = 5
-
     # Ubuntu's notify-osd doesn't officially support actions. However, it does have
     # a dialog fallback which we can use for this demonstration. In real use, please
     # respect the capabilities the notification server reports!
     OVERRIDE_NO_ACTIONS = True
 
     def __init__(self):
+
+        self.lib_path = os.path.join(os.path.dirname(__file__)) ## get libfacebooknotify path
+
+    	self.config = ConfigParser.SafeConfigParser()
+    	self.config.optionxform = str ## dont save as lowercase !!!!
+    	self.config.read(self.lib_path + '/config.cfg')
+
+    	self.HISTORY_MAX = int(self.config.get('MY_CONFIG', 'HISTORY_MAX'))
+    	self.SECONDS_UPDATE_FREQ = int(self.config.get('MY_CONFIG', 'SECONDS_UPDATE_FREQ'))
+
+    	self.LOGIN_HIGHT = int(self.config.get('MY_CONFIG', 'LOGIN_HIGHT'))
+    	self.LOGIN_WIDTH = int(self.config.get('MY_CONFIG', 'LOGIN_WIDTH'))
+
     	pynotify.init(APP_NAME)
 
         self.indicator = indicate.Indicator()
@@ -182,9 +189,12 @@ class Gui:
         about.connect("activate", self._on_about_clicked)
         quit = gtk.ImageMenuItem(stock_id=gtk.STOCK_QUIT)
         quit.connect("activate", self.exit)
-        npage = gtk.ImageMenuItem(gtk.STOCK_PROPERTIES)
+        npage = gtk.ImageMenuItem(gtk.STOCK_APPLY)
         npage.connect("activate", self._on_notify_clicked)
+	    nconfigs = gtk.ImageMenuItem(gtk.STOCK_PROPERTIES)
+        nconfigs.connect("activate", self._on_configs_clicked)
 
+	    self._rmenu.add(nconfigs)
         self._rmenu.add(npage)
         self._rmenu.add(about)
         self._rmenu.add(quit)
@@ -678,6 +688,13 @@ class Gui:
 
             self._notifications_first_query = False
             self._notifications = result
+
+    def _on_configs_clicked(self, widget):
+        from libfacebooknotify.configs import ConfigsWindow
+        win = ConfigsWindow()
+        win.set_position(gtk.WIN_POS_CENTER)
+        win.set_title("Facebook notifier settings")
+        win.show_all()
 
     def _on_notify_clicked(self, widget):
         #should probbably only do this once.
